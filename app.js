@@ -9,7 +9,9 @@ const corsOptions = {
   origin: function (origin, callback) {
     if (!origin || whitelist.indexOf(origin) !== -1) {
       callback(null, true)
+      console.log('ffffffffffffffffffffff')
     } else {
+      console.log('eeeeeeeeeeeeeeeeeeeee', "Not allowed by CORS")
       callback(new Error("Not allowed by CORS"))
     }
   },
