@@ -46,6 +46,7 @@ const verifyToken = async (req, res, next) => {
 				userRef.on('value', (snapshot) => {
 					console.log('sssssssssssss', snapshot.val());
 					req.user = {id: user.id, name: snapshot.val().name};
+          console.log('qqqqqqqqqqqqqqqqqqqq', req.user)
 					next();
 				}, (errorObject) => {
 					console.log('The read failed: ' + errorObject.name);
