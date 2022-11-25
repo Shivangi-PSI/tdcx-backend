@@ -23,7 +23,7 @@ const getSearchTasks = (req, res) => {
     .endAt(req.query.name + "\uf8ff")
     .on("value", async (snapshot) => {
       const tasks = snapshot.val();
-			console.log(Object.entries(tasks))
+			console.log(tasks)
       return utilities._200Response(res, {
         tasks: tasks,
         msg: "all tasks of a user",
@@ -35,6 +35,12 @@ const createTask = async (req, res) => {
   const taskRef = db.ref("tasks");
 
   const data = { name: req.body.name, userId: req.user.id };
+  if(req.body.name === ''){
+    return utilities._400Response(res, {
+      error: "Name can't be blank",
+      msg: "Something went wrong",
+    });
+  }
   const task = await taskRef.push(data, (err) => {
     if (err) {
       return utilities._400Response(res, {
@@ -44,7 +50,6 @@ const createTask = async (req, res) => {
     }
   });
   task.once("value", (snapshot) => {
-		console.log()
     return utilities._200Response(res, {
       task: {[snapshot.key]: snapshot.val()},
       msg: "task is created",
