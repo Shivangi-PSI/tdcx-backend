@@ -22,7 +22,6 @@ add firebase credentials to the .env
 
 ```bash
 npm install
-npm i -g nodemon
 npm start
 ```
 
