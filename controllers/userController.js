@@ -33,7 +33,8 @@ const loginUser = async (req, res) => {
       }
       const [userKey, user] = Object.entries(snapshot.val())[0];
       if (
-        true
+        user.password ===
+        crypto.createHash("md5").update(password).digest("hex")
       ) {
         const token = await generateToken({ id: userKey });
         return utilities._200Response(res, {
