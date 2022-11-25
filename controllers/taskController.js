@@ -68,10 +68,14 @@ const updateTask = async (req, res) => {
     }
   });
   taskRef.once("value", (snapshot) => {
-    return utilities._200Response(res, {
-			task: {[snapshot.key]: snapshot.val()},
-      msg: "task is updated",
-    });
+    if(snapshot.val){
+      return utilities._200Response(res, {
+        task: {[snapshot.key]: snapshot.val()},
+        msg: "task is updated",
+      });
+    }else{
+      console.log('eeeeeeeeeeeeeenot fetchedeeeeeeee')
+    }
   });
 };
 
