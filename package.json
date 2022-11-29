@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "TDCX assessment to craete 2-page dashboard app",
   "main": "index.js",
+  "engines": {
+    "node": "14.10.0"
+    },
   "scripts": {
     "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
