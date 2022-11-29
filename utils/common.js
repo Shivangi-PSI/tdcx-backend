@@ -43,15 +43,19 @@ const verifyToken = async (req, res, next) => {
       if (user) {
         console.log("JWT Token verification success", user);
         const userRef = db.ref(`users/${user.id}`);
-				userRef.on('value', (snapshot) => {
-					console.log('sssssssssssss', snapshot.val());
-					req.user = {id: user.id, name: snapshot.val().name};
-          console.log('qqqqqqqqqqqqqqqqqqqq', req.user)
-					next();
-				}, (errorObject) => {
-					console.log('The read failed: ' + errorObject.name);
-					next();
-				}); 
+        userRef.on(
+          "value",
+          (snapshot) => {
+            console.log("sssssssssssss", snapshot.val());
+            req.user = { id: user.id, name: snapshot.val().name };
+            console.log("qqqqqqqqqqqqqqqqqqqq", req.user);
+            next();
+          },
+          (errorObject) => {
+            console.log("The read failed: " + errorObject.name);
+            next();
+          }
+        );
       } else if (err.message === "jwt expired") {
         console.log(`\n\n\nToken expired error caught -> ${err.message}\n\n\n`);
 
@@ -81,10 +85,18 @@ const sortData = (data, field) => {
   return data.sort((a, b) => a[field] - b[field]);
 };
 
+const transformResponse = (snap) => {
+  return Object.entries(snap || {}).map((e) => {
+    console.log(e)
+    return { ...e[1], id: e[0] };
+  });
+};
+
 module.exports = {
   generateToken,
   _200Response,
   verifyToken,
   _400Response,
   sortData,
+  transformResponse
 };

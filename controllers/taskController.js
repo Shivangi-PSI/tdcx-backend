@@ -7,7 +7,10 @@ const getAllTasks = (req, res) => {
     .orderByChild("userId")
     .equalTo(req.user.id)
     .on("value", async (snapshot) => {
-      const tasks = snapshot.val();
+      const tasks = utilities.transformResponse(snapshot.val());
+      tasks.sort((x, y) => {
+        return y.createdAt - x.createdAt;
+      });
       return utilities._200Response(res, {
         tasks: tasks,
         msg: "all tasks of a user",
@@ -22,8 +25,10 @@ const getSearchTasks = (req, res) => {
     .startAt(req.query.name)
     .endAt(req.query.name + "\uf8ff")
     .on("value", async (snapshot) => {
-      const tasks = snapshot.val();
-			console.log(tasks)
+      const tasks = utilities.transformResponse(snapshot.val());
+      tasks.sort((x, y) => {
+        return y.createdAt - x.createdAt;
+      });
       return utilities._200Response(res, {
         tasks: tasks,
         msg: "all tasks of a user",
@@ -34,8 +39,13 @@ const getSearchTasks = (req, res) => {
 const createTask = async (req, res) => {
   const taskRef = db.ref("tasks");
 
-  const data = { name: req.body.name, userId: req.user.id };
-  if(req.body.name === ''){
+  const data = {
+    name: req.body.name,
+    userId: req.user.id,
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+  };
+  if (req.body.name === "") {
     return utilities._400Response(res, {
       error: "Name can't be blank",
       msg: "Something went wrong",
@@ -51,7 +61,7 @@ const createTask = async (req, res) => {
   });
   task.once("value", (snapshot) => {
     return utilities._200Response(res, {
-      task: {[snapshot.key]: snapshot.val()},
+      task: { ...snapshot.val(), id: snapshot.key },
       msg: "task is created",
     });
   });
@@ -59,7 +69,8 @@ const createTask = async (req, res) => {
 
 const updateTask = async (req, res) => {
   const taskRef = db.ref(`tasks/${req.query.id}`);
-  await taskRef.update(req.body, (err) => {
+  const body = { ...req.body, updatedAt: Date.now() };
+  await taskRef.update(body, (err) => {
     if (err) {
       return utilities._400Response(res, {
         error: err,
@@ -68,13 +79,13 @@ const updateTask = async (req, res) => {
     }
   });
   taskRef.once("value", (snapshot) => {
-    if(snapshot.val){
+    if (snapshot.val) {
       return utilities._200Response(res, {
-        task: {[snapshot.key]: snapshot.val()},
+        task: { ...snapshot.val(), id: snapshot.key },
         msg: "task is updated",
       });
-    }else{
-      console.log('eeeeeeeeeeeeeenot fetchedeeeeeeee')
+    } else {
+      console.log("eeeeeeeeeeeeeenot fetchedeeeeeeee");
     }
   });
 };
