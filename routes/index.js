@@ -11,7 +11,6 @@ router.get("/", function (req, res) {
 
 router.post("/login", loginUser)
 
-// router.use(verifyToken)
 router.get("/current-user", verifyToken, getUser)
 router.get("/tasks",verifyToken, getAllTasks);
 router.post("/tasks",verifyToken, createTask);

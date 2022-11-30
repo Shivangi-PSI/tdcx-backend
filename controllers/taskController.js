@@ -1,5 +1,12 @@
 const db = require("../models");
 const utilities = require("../utils/common");
+const {
+  BLANK_NAME_ERROR,
+  TASK_ERROR,
+  TASK_CREATION_SUCCESS,
+  TASK_UPDATION_SUCCESS,
+  TASK_DELETION_SUCCESS,
+} = require("../utils/constant");
 
 const getAllTasks = (req, res) => {
   const taskRef = db.ref("tasks");
@@ -12,8 +19,7 @@ const getAllTasks = (req, res) => {
         return y.createdAt - x.createdAt;
       });
       return utilities._200Response(res, {
-        tasks: tasks,
-        msg: "all tasks of a user",
+        tasks: tasks
       });
     });
 };
@@ -30,8 +36,7 @@ const getSearchTasks = (req, res) => {
         return y.createdAt - x.createdAt;
       });
       return utilities._200Response(res, {
-        tasks: tasks,
-        msg: "all tasks of a user",
+        tasks: tasks
       });
     });
 };
@@ -47,22 +52,21 @@ const createTask = async (req, res) => {
   };
   if (req.body.name === "") {
     return utilities._400Response(res, {
-      error: "Name can't be blank",
-      msg: "Something went wrong",
+      error: BLANK_NAME_ERROR,
     });
   }
   const task = await taskRef.push(data, (err) => {
     if (err) {
       return utilities._400Response(res, {
         error: err,
-        msg: "Something went wrong",
+        msg: TASK_ERROR,
       });
     }
   });
   task.once("value", (snapshot) => {
     return utilities._200Response(res, {
       task: { ...snapshot.val(), id: snapshot.key },
-      msg: "task is created",
+      msg: TASK_CREATION_SUCCESS,
     });
   });
 };
@@ -74,7 +78,7 @@ const updateTask = async (req, res) => {
     if (err) {
       return utilities._400Response(res, {
         error: err,
-        msg: "Something went wrong",
+        msg: TASK_ERROR,
       });
     }
   });
@@ -82,10 +86,12 @@ const updateTask = async (req, res) => {
     if (snapshot.val) {
       return utilities._200Response(res, {
         task: { ...snapshot.val(), id: snapshot.key },
-        msg: "task is updated",
+        msg: TASK_UPDATION_SUCCESS,
       });
     } else {
-      console.log("eeeeeeeeeeeeeenot fetchedeeeeeeee");
+      return utilities._400Response(res, {
+        error: TASK_ERROR,
+      });
     }
   });
 };
@@ -96,14 +102,14 @@ const deleteTask = (req, res) => {
     .remove()
     .then(() => {
       return utilities._200Response(res, {
-        msg: "task is deleted",
+        msg: TASK_DELETION_SUCCESS,
       });
     })
     .catch((error) => {
       console.log("Error deleting data:", error);
       return utilities._400Response(res, {
         error: error,
-        msg: "Something went wrong",
+        msg: TASK_ERROR,
       });
     });
 };

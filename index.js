@@ -2,9 +2,10 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const app = require('./app');
+const logger = require('./config/logger');
 
 let server = app.listen(process.env.PORT, () => {
-	console.log(`Server is running on port ${process.env.PORT}.`);
+	logger.info(`Server is running on port ${process.env.PORT}.`);
 });
 
 const exitHandler = () => {

@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const logger = require("../config/logger");
 const db = require("../models");
 
 const generateToken = (key) => {
@@ -16,13 +17,13 @@ const generateToken = (key) => {
 };
 
 const verifyToken = async (req, res, next) => {
-  console.log(
+  logger.info(
     `AccessToken verification process started at verifyToken function\n`
   );
   try {
-    console.log(`${JSON.stringify(req.headers)}\n`);
+    logger.info(`${JSON.stringify(req.headers)}\n`);
 
-    console.log(`req.headers["authorization"] => ${req.headers.authorization}`);
+    logger.info(`req.headers["authorization"] => ${req.headers.authorization}`);
 
     let token = req.headers.authorization;
 
@@ -31,33 +32,31 @@ const verifyToken = async (req, res, next) => {
         .status(403)
         .json({ message: "Please provide authorization token" });
 
-    console.log(JSON.stringify(req.body));
+    logger.info(JSON.stringify(req.body));
 
     // eslint-disable-next-line prefer-destructuring
     token = token.split(" ")[1];
 
-    console.log(`Token is ${token}\n`);
+    logger.info(`Token is ${token}\n`);
 
     jwt.verify(token, process.env.JWT_SECRET_TOKEN, async (err, user) => {
-      console.log(`User ${JSON.stringify(user)}`);
+      logger.info(`User ${JSON.stringify(user)}`);
       if (user) {
-        console.log("JWT Token verification success", user);
+        logger.info("JWT Token verification success", user);
         const userRef = db.ref(`users/${user.id}`);
         userRef.on(
           "value",
           (snapshot) => {
-            console.log("sssssssssssss", snapshot.val());
             req.user = { id: user.id, name: snapshot.val().name };
-            console.log("qqqqqqqqqqqqqqqqqqqq", req.user);
             next();
           },
           (errorObject) => {
-            console.log("The read failed: " + errorObject.name);
+            logger.info("The read failed: " + errorObject.name);
             next();
           }
         );
       } else if (err.message === "jwt expired") {
-        console.log(`\n\n\nToken expired error caught -> ${err.message}\n\n\n`);
+        logger.info(`\n\n\nToken expired error caught -> ${err.message}\n\n\n`);
 
         return res.status(403).json({
           success: false,
@@ -87,7 +86,6 @@ const sortData = (data, field) => {
 
 const transformResponse = (snap) => {
   return Object.entries(snap || {}).map((e) => {
-    console.log(e)
     return { ...e[1], id: e[0] };
   });
 };

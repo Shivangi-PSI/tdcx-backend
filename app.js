@@ -9,9 +9,7 @@ const corsOptions = {
   origin: function (origin, callback) {
     if (!origin || whitelist.indexOf(origin) !== -1) {
       callback(null, true)
-      console.log('ffffffffffffffffffffff')
     } else {
-      console.log('eeeeeeeeeeeeeeeeeeeee', "Not allowed by CORS")
       callback(new Error("Not allowed by CORS"))
     }
   },
@@ -20,7 +18,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 app.use(express.json());
-// parse requests of content-type - application/x-www-form-urlencoded
+
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/", routes);

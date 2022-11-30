@@ -2,17 +2,17 @@ const db = require("../models");
 var crypto = require("crypto");
 const { generateToken } = require("../utils/common");
 const utilities = require("../utils/common");
+const { CURRENT_USER, INCORRECT_LOGIN, NO_USER, SUCCESS_LOGIN } = require("../utils/constant");
 
 const getUser = async (req, res) => {
   if (!req.user) {
-    return utilities._400Response(res, { error: "No user exit" });
+    return utilities._400Response(res, { error: NO_USER });
   }
   db.ref(`users/${req.user.id}`).once("value", (snapshot) => {
     if (snapshot.val()) {
-      console.log(snapshot.val());
       return utilities._200Response(res, {
         user: { name: snapshot.val().name },
-        msg: "Current user",
+        msg: CURRENT_USER,
       });
     }
   });
@@ -25,10 +25,9 @@ const loginUser = async (req, res) => {
     .orderByChild("name")
     .equalTo(name)
     .on("value", async (snapshot) => {
-      console.log(snapshot.val());
       if (!snapshot.val()) {
         return utilities._400Response(res, {
-          error: "Incorrect name or password",
+          error: INCORRECT_LOGIN,
         });
       }
       const [userKey, user] = Object.entries(snapshot.val())[0];
@@ -39,11 +38,11 @@ const loginUser = async (req, res) => {
         const token = await generateToken({ id: userKey });
         return utilities._200Response(res, {
           user: { name: user.name, token },
-          msg: "Current user",
+          msg: SUCCESS_LOGIN,
         });
       } else {
         return utilities._400Response(res, {
-          error: "Incorrect name or password",
+          error: INCORRECT_LOGIN,
         });
       }
     });
